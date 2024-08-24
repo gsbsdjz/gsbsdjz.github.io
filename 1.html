@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>彩票随机生成器</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f9;
+        color: #333;
+    }
+    .container {
+        width: 300px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    input[type="radio"] {
+        margin-right: 10px;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #5cb85c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #4cae4c;
+    }
+    .results {
+        margin-top: 20px;
+    }
+    .result {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-left: 5px solid #5cb85c;
+        border-radius: 4px;
+    }
+</style>
+</head>
+<body>
+<div id="app" class="container">
+    <h2>彩票生成器</h2>
+    <div class="form-group">
+        <label>选择类型:</label>
+        <label><input type="radio" value="ssq" v-model="lotteryType"> 双色球</label>
+        <label><input type="radio" value="dlt" v-model="lotteryType"> 大乐透</label>
+    </div>
+    <div class="form-group">
+        <label for="groupCount">输入组数:</label>
+        <input type="number" id="groupCount" v-model="groupCount" min="1" max="100">
+    </div>
+    <button @click="generate">生成</button>
+    <div class="results">
+        <div v-for="(group, index) in groups" :key="index" class="result">
+            <strong>组 {{ index + 1 }}:</strong><br>
+            <span>前区: {{ group.front.join(', ') }}</span>
+            <span>后区: {{ group.back.join(', ') }}</span>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            lotteryType: 'ssq', // 默认选择双色球
+            groupCount: 1,
+            groups: []
+        },
+        methods: {
+            generate() {
+                this.groups = [];
+                for (let i = 0; i < this.groupCount; i++) {
+                    let front = [];
+                    let back = [];
+
+                    if (this.lotteryType === 'ssq') {
+                        // 生成双色球号码（红球1-33选6 + 蓝球1-16选1）
+                        while (front.length < 6) {
+                            let num = Math.floor(Math.random() * 33) + 1;
+                            num = num < 10 ? '0' + num : num.toString(); // 补零
+                            if (!front.includes(num)) {
+                                front.push(num);
+                            }
+                        }
+                        front.sort((a, b) => a - b);
+                        // 生成蓝球号码
+                        let blue = Math.floor(Math.random() * 16) + 1;
+                        blue = blue < 10 ? '0' + blue : blue.toString(); // 补零
+                        back.push(blue);
+                    } else if (this.lotteryType === 'dlt') {
+                        // 生成大乐透号码（前区1-35选5 + 后区1-12选2）
+                        while (front.length < 5) {
+                            let num = Math.floor(Math.random() * 35) + 1;
+                            num = num < 10 ? '0' + num : num.toString(); // 补零
+                            if (!front.includes(num)) {
+                                front.push(num);
+                            }
+                        }
+                        front.sort((a, b) => a - b);
+                        // 生成后区号码
+                        while (back.length < 2) {
+                            let num = Math.floor(Math.random() * 12) + 1;
+                            num = num < 10 ? '0' + num : num.toString(); // 补零
+                            if (!back.includes(num)) {
+                                back.push(num);
+                            }
+                        }
+                        back.sort((a, b) => a - b);
+                    }
+
+                    this.groups.push({ front, back });
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
