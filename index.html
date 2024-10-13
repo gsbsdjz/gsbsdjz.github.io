@@ -71,8 +71,8 @@
     <div class="format-info" id="formatInfo">
         <p>输入格式说明：</p>
         <ul>
-            <li><strong>HH:MM</strong> - 不跨天的时间，例如 "10:30"。</li>
-            <li><strong>D:HH:MM</strong> - 跨天的时间，其中 D 表示天数，例如 "1:15:30" 表示下一天15:30 。</li>
+            <li><strong>HH:mm</strong> - 不跨天的时间，例如 "10:30"。</li>
+            <li><strong>D:HH:mm</strong> - 跨天的时间，其中 D 表示天数，例如 "1:15:30" 表示下一天15:30 。</li>
         </ul>
     </div>
 </div>
@@ -93,7 +93,7 @@ function parseTime(inputStr) {
         const minutes = parseInt(parts[1], 10);
         return { totalHours: hours, minutes: minutes };
     } else {
-        throw new Error("输入格式不正确，需为 D:HH:MM 或 HH:MM");
+        throw new Error("输入格式不正确，需为 D:HH:mm 或 HH:mm");
     }
 }
 
