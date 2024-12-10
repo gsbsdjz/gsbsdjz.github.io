@@ -9,45 +9,64 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         .container {
             max-width: 400px;
             margin: 0 auto;
         }
-        label, input {
+
+        label {
             display: block;
             margin-bottom: 10px;
         }
+
+        .input-group {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        input {
+            flex: 1;
+            padding: 0 10px;
+            font-size: 16px;
+            height: 40px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .input-group input {
+            border-radius: 4px 0 0 4px; /* 左侧圆角 */
+        }
+
         button {
-            padding: 10px;
+            height: 40px;
+            padding: 0 15px;
+            font-size: 16px;
             background-color: #4CAF50;
             color: white;
-            border: none;
+            border: 1px solid #4CAF50;
+            border-radius: 0 4px 4px 0; /* 右侧圆角 */
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
         .result {
             margin-top: 20px;
             font-weight: bold;
         }
+
         .format-info {
-            display: block; /* 直接显示 */
+            display: block;
             margin-top: 10px;
             font-size: 0.9em;
             background-color: #f9f9f9;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
-        }
-        .format-link {
-            color: #007BFF;
-            text-decoration: underline;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        .format-link:hover {
-            color: #0056b3;
         }
     </style>
 </head>
@@ -57,14 +76,20 @@
     <h1>植物最早成熟时间</h1>
 
     <label for="currentTime">当前时间(刚浇完水):</label>
-    <div style="display: flex; align-items: center;">
+    <div class="input-group">
         <input type="text" id="currentTime" placeholder="请输入">
+        <button onclick="fillCurrentTime()">自动获取</button>
     </div>
-    
-    <label for="autoMatureTime">自动成熟时间:</label>
-    <input type="text" id="autoMatureTime" placeholder="请输入">
 
-    <button onclick="calculateMaturity()">计算</button>
+    <label for="autoMatureTime">自动成熟时间:</label>
+    <div class="input-group">
+        <input type="text" id="autoMatureTime" placeholder="请输入">
+    </div>
+
+    <button onclick="calculateMaturity()"
+            style="width: 100%; height: 40px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 16px;">
+        计算
+    </button>
 
     <div class="result" id="result"></div>
 
@@ -78,69 +103,63 @@
 </div>
 
 <script>
-function parseTime(inputStr) {
-    const parts = inputStr.split(':');
-    
-    if (parts.length === 3) {
-        // 解析 D:HH:MM 格式
-        const days = parseInt(parts[0], 10);
-        const hours = parseInt(parts[1], 10);
-        const minutes = parseInt(parts[2], 10);
-        return { totalHours: days * 24 + hours, minutes: minutes };
-    } else if (parts.length === 2) {
-        // 解析 HH:MM 格式
-        const hours = parseInt(parts[0], 10);
-        const minutes = parseInt(parts[1], 10);
-        return { totalHours: hours, minutes: minutes };
-    } else {
-        throw new Error("输入格式不正确，需为 D:HH:mm 或 HH:mm");
+    function fillCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('currentTime').value = `${hours}:${minutes}`;
     }
-}
 
-function formatTime(hours, minutes) {
-    if (hours >= 24) {
-        const days = Math.floor(hours / 24);
-        hours = hours % 24;
-        return `${days}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    } else {
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    function parseTime(inputStr) {
+        const parts = inputStr.split(':');
+        if (parts.length === 3) {
+            const days = parseInt(parts[0], 10);
+            const hours = parseInt(parts[1], 10);
+            const minutes = parseInt(parts[2], 10);
+            return {totalHours: days * 24 + hours, minutes: minutes};
+        } else if (parts.length === 2) {
+            const hours = parseInt(parts[0], 10);
+            const minutes = parseInt(parts[1], 10);
+            return {totalHours: hours, minutes: minutes};
+        } else {
+            throw new Error("输入格式不正确，需为 D:HH:mm 或 HH:mm");
+        }
     }
-}
 
-function calculateMatureTime(yHours, yMinutes, zHours, zMinutes) {
-    // 将当前时间和自动成熟时间转换为分钟
-    const yTotalMinutes = yHours * 60 + yMinutes;
-    const zTotalMinutes = zHours * 60 + zMinutes;
+    function calculateMatureTime(yHours, yMinutes, zHours, zMinutes) {
+        const yTotalMinutes = yHours * 60 + yMinutes;
+        const zTotalMinutes = zHours * 60 + zMinutes;
 
-    // 使用公式 x = (4z + y) / 5
-    const xTotalMinutes = Math.floor((4 * zTotalMinutes + yTotalMinutes) / 5);
+        const xTotalMinutes = Math.floor((4 * zTotalMinutes + yTotalMinutes) / 5);
 
-    // 将 x 转换为小时和分钟
-    const xHours = Math.floor(xTotalMinutes / 60);
-    const xMinutes = xTotalMinutes % 60;
+        const xHours = Math.floor(xTotalMinutes / 60);
+        const xMinutes = xTotalMinutes % 60;
 
-    return { hours: xHours, minutes: xMinutes };
-}
-
-function calculateMaturity() {
-    const currentTimeInput = document.getElementById('currentTime').value;
-    const autoMatureTimeInput = document.getElementById('autoMatureTime').value;
-
-    try {
-        // 解析用户输入的当前时间和自动成熟时间
-        const currentTime = parseTime(currentTimeInput);
-        const autoMatureTime = parseTime(autoMatureTimeInput);
-
-        // 计算最早成熟时间
-        const matureTime = calculateMatureTime(currentTime.totalHours, currentTime.minutes, autoMatureTime.totalHours, autoMatureTime.minutes);
-
-        // 输出结果
-        const result = formatTime(matureTime.hours, matureTime.minutes);
-        document.getElementById('result').textContent = `最早成熟时间为: ${result}`;
-    } catch (error) {
-        document.getElementById('result').textContent = `错误: ${error.message}`;
+        return {hours: xHours, minutes: xMinutes};
     }
-}
+
+    function calculateMaturity() {
+        const currentTimeInput = document.getElementById('currentTime').value;
+        const autoMatureTimeInput = document.getElementById('autoMatureTime').value;
+
+        try {
+            const currentTime = parseTime(currentTimeInput);
+            const autoMatureTime = parseTime(autoMatureTimeInput);
+
+            const matureTime = calculateMatureTime(currentTime.totalHours, currentTime.minutes, autoMatureTime.totalHours, autoMatureTime.minutes);
+            let result;
+            if (matureTime.hours >= 24) {
+                const days = Math.floor(matureTime.hours / 24);
+                const hours = matureTime.hours % 24;
+                result = `${days}:${String(hours).padStart(2, '0')}:${String(matureTime.minutes).padStart(2, '0')}`;
+            } else {
+                result = `${String(matureTime.hours).padStart(2, '0')}:${String(matureTime.minutes).padStart(2, '0')}`;
+            }
+            document.getElementById('result').textContent = `最早成熟时间为: ${result}`;
+        } catch (error) {
+            document.getElementById('result').textContent = `错误: ${error.message}`;
+        }
+    }
 </script>
 
 </body>
